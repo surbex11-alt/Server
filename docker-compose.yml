@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: snap-qr-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    networks:
+      - snap-qr-network
+
+  app:
+    build: .
+    container_name: snap-qr-app
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/snap-qr
+      PORT: 3000
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - snap-qr-network
+    command: npm run dev
+
+volumes:
+  mongodb_data:
+
+networks:
+  snap-qr-network:
+    driver: bridge
